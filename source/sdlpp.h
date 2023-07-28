@@ -443,14 +443,21 @@ class Renderer
 
     Renderer(RendererUniquePtr renderer) : renderer_{std::move(renderer)} {}
 
-    [[nodiscard]] RendererUniquePtr::pointer get() const noexcept
+    [[nodiscard]] RendererUniquePtr::pointer get_pointer() const noexcept
     {
         return renderer_.get();
     }
 
+    void set_scale(float scale_x, float scale_y) const
+    {
+        if (SDL_RenderSetScale(get_pointer(), scale_x, scale_y) != 0) {
+            throw exception::generic_error{};
+        }
+    }
+
     void set_draw_blend_mode(SDL_BlendMode mode) const
     {
-        if (SDL_SetRenderDrawBlendMode(get(), mode) != 0) {
+        if (SDL_SetRenderDrawBlendMode(get_pointer(), mode) != 0) {
             throw exception::generic_error{};
         }
     }
@@ -458,7 +465,7 @@ class Renderer
     [[nodiscard]] SDL_BlendMode get_draw_blend_mode() const
     {
         SDL_BlendMode mode;
-        if (SDL_GetRenderDrawBlendMode(get(), &mode) != 0) {
+        if (SDL_GetRenderDrawBlendMode(get_pointer(), &mode) != 0) {
             throw exception::generic_error{};
         }
         return mode;
@@ -466,21 +473,21 @@ class Renderer
 
     void set_draw_color(const Color& color) const
     {
-        if (SDL_SetRenderDrawColor(get(), color.r, color.g, color.b, color.a) != 0) {
+        if (SDL_SetRenderDrawColor(get_pointer(), color.r, color.g, color.b, color.a) != 0) {
             throw exception::generic_error{};
         }
     }
 
     void clear() const
     {
-        if (SDL_RenderClear(get()) != 0) {
+        if (SDL_RenderClear(get_pointer()) != 0) {
             throw exception::generic_error{};
         }
     }
 
     void present() const noexcept
     {
-        SDL_RenderPresent(get());
+        SDL_RenderPresent(get_pointer());
     }
 
     template <typename T>

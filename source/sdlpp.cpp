@@ -169,7 +169,7 @@ make_window(const char* title, int x_position, int y_position, int width, int he
 
 [[nodiscard]] TextureUniquePtr Renderer::make_texture_from_surface(SDL_Surface* surface)
 {
-    return ::sdl::make_texture_from_surface(renderer_.get(), surface);
+    return ::sdl::make_texture_from_surface(get_pointer(), surface);
 }
 
 [[nodiscard]] SurfaceUniquePtr load_bmp(const std::string& filename)
@@ -193,7 +193,7 @@ make_window(const char* title, int x_position, int y_position, int width, int he
 template <>
 void Renderer::draw_point<int>(int point_x, int point_y) const
 {
-    if (SDL_RenderDrawPoint(get(), point_x, point_y) != 0) {
+    if (SDL_RenderDrawPoint(get_pointer(), point_x, point_y) != 0) {
         throw exception::generic_error{};
     }
 }
@@ -201,7 +201,7 @@ void Renderer::draw_point<int>(int point_x, int point_y) const
 template <>
 void Renderer::draw_point<float>(float point_x, float point_y) const
 {
-    if (SDL_RenderDrawPointF(get(), point_x, point_y) != 0) {
+    if (SDL_RenderDrawPointF(get_pointer(), point_x, point_y) != 0) {
         throw exception::generic_error{};
     }
 }
@@ -219,7 +219,7 @@ void Renderer::draw_point<Point<float>>(Point<float> point) const {
 
 void Renderer::draw_line(int x_begin, int y_begin, int x_end, int y_end) const
 {
-    if (SDL_RenderDrawLine(get(), x_begin, y_begin, x_end, y_end) != 0) {
+    if (SDL_RenderDrawLine(get_pointer(), x_begin, y_begin, x_end, y_end) != 0) {
         throw exception::generic_error{};
     }
 }
@@ -232,7 +232,7 @@ void Renderer::draw_line(Point<int> begin, Point<int> end) const
 template <>
 void Renderer::fill_rectangle<Rectangle<int>>(const Rectangle<int>& rectangle)
 {
-    if (SDL_RenderFillRect(renderer_.get(), &rectangle) != 0) {
+    if (SDL_RenderFillRect(get_pointer(), &rectangle) != 0) {
         throw exception::generic_error{};
     }
 }
@@ -240,7 +240,7 @@ void Renderer::fill_rectangle<Rectangle<int>>(const Rectangle<int>& rectangle)
 template <>
 void Renderer::fill_rectangle<Rectangle<float>>(const Rectangle<float>& rectangle)
 {
-    if (SDL_RenderFillRectF(renderer_.get(), &rectangle) != 0) {
+    if (SDL_RenderFillRectF(get_pointer(), &rectangle) != 0) {
         throw exception::generic_error{};
     }
 }
@@ -248,7 +248,7 @@ void Renderer::fill_rectangle<Rectangle<float>>(const Rectangle<float>& rectangl
 template <>
 void Renderer::fill_rectangles<Rectangle<int>>(std::span<Rectangle<int>> rectangles)
 {
-    if (SDL_RenderFillRects(renderer_.get(), rectangles.data(), gsl::narrow<int>(rectangles.size())) != 0) {
+    if (SDL_RenderFillRects(get_pointer(), rectangles.data(), gsl::narrow<int>(rectangles.size())) != 0) {
         throw exception::generic_error{};
     }
 }
@@ -256,7 +256,7 @@ void Renderer::fill_rectangles<Rectangle<int>>(std::span<Rectangle<int>> rectang
 template <>
 void Renderer::fill_rectangles<Rectangle<float>>(std::span<Rectangle<float>> rectangles)
 {
-    if (SDL_RenderFillRectsF(renderer_.get(), rectangles.data(), gsl::narrow<int>(rectangles.size())) != 0) {
+    if (SDL_RenderFillRectsF(get_pointer(), rectangles.data(), gsl::narrow<int>(rectangles.size())) != 0) {
         throw exception::generic_error{};
     }
 }
@@ -264,7 +264,7 @@ void Renderer::fill_rectangles<Rectangle<float>>(std::span<Rectangle<float>> rec
 template <>
 void Renderer::copy<int>(SDL_Texture& texture, const Rectangle<int>& source, const Rectangle<int>& destination)
 {
-    if (SDL_RenderCopy(renderer_.get(), &texture, &source, &destination) != 0) {
+    if (SDL_RenderCopy(get_pointer(), &texture, &source, &destination) != 0) {
         throw exception::generic_error{};
     }
 }
@@ -272,7 +272,7 @@ void Renderer::copy<int>(SDL_Texture& texture, const Rectangle<int>& source, con
 template <>
 void Renderer::copy<float>(SDL_Texture& texture, const Rectangle<int>& source, const Rectangle<float>& destination)
 {
-    if (SDL_RenderCopyF(renderer_.get(), &texture, &source, &destination) != 0) {
+    if (SDL_RenderCopyF(get_pointer(), &texture, &source, &destination) != 0) {
         throw exception::generic_error{};
     }
 }

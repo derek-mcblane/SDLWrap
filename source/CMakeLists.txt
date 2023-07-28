@@ -14,3 +14,10 @@ target_include_directories(SDLImageWrap PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(SDLImageWrap PUBLIC Microsoft.GSL::GSL)
 target_link_libraries(SDLImageWrap PUBLIC SDL2::SDL2)
 target_link_libraries(SDLImageWrap PUBLIC SDL2_image::SDL2_image)
+
+install(IMPORTED_RUNTIME_ARTIFACTS
+    SDL2::SDL2
+    SDL2_image::SDL2_image
+    CONFIGURATIONS Debug Release
+    RUNTIME DESTINATION bin
+)

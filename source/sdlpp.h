@@ -55,6 +55,12 @@ struct select_point<float>
 template <typename T>
 using Point = typename select_point<T>::type;
 
+template <typename T>
+concept SDLPointT = std::disjunction_v<
+    std::is_same<T, SDL_Point>,
+    std::is_same<T, SDL_FPoint>
+>;
+
 template <typename Point>
 struct point_dimension;
 
@@ -73,68 +79,69 @@ struct point_dimension<SDL_FRect>
     using type = float;
 };
 
-template <typename PointT>
-bool operator==(const PointT lhs, const PointT rhs)
+template <SDLPointT T>
+bool operator==(const T lhs, const T rhs)
 {
     return lhs.x == rhs.x && lhs.y == rhs.y;
 }
 
-template <typename PointT>
-bool operator!=(const PointT lhs, const PointT rhs)
+template <SDLPointT T>
+bool operator!=(const T lhs, const T rhs)
 {
-    return !(lhs == rhs);
+    return lhs.x != rhs.x || lhs.y != rhs.y;
 }
 
-template <typename PointT>
-PointT operator+(const PointT lhs, const PointT rhs)
+template <SDLPointT T>
+T operator+(const T lhs, const T rhs)
 {
     return {lhs.x + rhs.x, lhs.y + rhs.y};
 }
 
-template <typename PointT>
-PointT& operator+=(PointT& lhs, const PointT rhs)
+template <SDLPointT T>
+
+T& operator+=(T& lhs, const T rhs)
 {
     return lhs = lhs + rhs;
 }
 
-template <typename PointT>
-PointT operator-(const PointT lhs, const PointT rhs)
+template <SDLPointT T>
+T operator-(const T lhs, const T rhs)
 {
     return {lhs.x - rhs.x, lhs.y - rhs.y};
 }
 
-template <typename PointT>
-PointT& operator-=(PointT& lhs, const PointT rhs)
+template <SDLPointT T>
+T& operator-=(T& lhs, const T rhs)
 {
     return lhs = lhs - rhs;
 }
 
-template <typename PointT, typename U>
-PointT operator*(const U lhs, const PointT rhs)
+template <SDLPointT T, typename U>
+T operator*(const U lhs, const T rhs)
 {
     return {lhs * rhs.x, lhs * rhs.y};
 }
 
-template <typename PointT, typename U>
-PointT operator*(const PointT lhs, const U rhs)
+template <SDLPointT T, typename U>
+T operator*(const T lhs, const U rhs)
 {
     return {lhs.x * rhs, lhs.y * rhs};
 }
 
-template <typename PointT, typename U>
-PointT& operator*=(PointT& lhs, const U rhs)
+template <SDLPointT T, typename U>
+T& operator*=(T& lhs, const U rhs)
 {
     return lhs = lhs * rhs;
 }
 
-template <typename PointT, typename U>
-PointT operator/(const PointT lhs, const U rhs)
+template <SDLPointT T, typename U>
+T operator/(const T lhs, const U rhs)
 {
     return {lhs.x / rhs, lhs.y / rhs};
 }
 
-template <typename PointT, typename U>
-PointT& operator/=(PointT& lhs, const U rhs)
+template <SDLPointT T, typename U>
+T& operator/=(T& lhs, const U rhs)
 {
     return lhs = lhs / rhs;
 }

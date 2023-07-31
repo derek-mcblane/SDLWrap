@@ -43,15 +43,15 @@ class load_image : virtual public std::runtime_error
 
 } // namespace exception
 
-enum class InitFlags
+namespace InitFlags
 {
-    None = 0,
-    JPG = IMG_INIT_JPG,
-    PNG = IMG_INIT_PNG,
-    TIF = IMG_INIT_TIF,
-    WebP = IMG_INIT_WEBP,
-    JXL = IMG_INIT_JXL,
-    AVIF = IMG_INIT_AVIF,
+    static constexpr int None = 0;
+    static constexpr int JPG = IMG_INIT_JPG;
+    static constexpr int PNG = IMG_INIT_PNG;
+    static constexpr int TIF = IMG_INIT_TIF;
+    static constexpr int WebP = IMG_INIT_WEBP;
+    static constexpr int JXL = IMG_INIT_JXL;
+    static constexpr int AVIF = IMG_INIT_AVIF;
 };
 
 inline void initialize(int flags)
@@ -59,11 +59,6 @@ inline void initialize(int flags)
     if ((IMG_Init(flags) & flags) == 0) {
         throw exception::initialize_extension{};
     }
-}
-
-inline void initialize(InitFlags flags)
-{
-    initialize(static_cast<int>(flags));
 }
 
 inline void quit()

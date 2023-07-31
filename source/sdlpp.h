@@ -280,31 +280,26 @@ class texture_from_surface final : virtual public generic_error
 
 } // namespace exception
 
-enum class InitFlags : Uint32
+namespace InitFlags
 {
-    None = 0,
-    Timer = SDL_INIT_TIMER,
-    Audio = SDL_INIT_AUDIO,
-    Video = SDL_INIT_VIDEO,
-    Joystick = SDL_INIT_JOYSTICK,
-    Haptic = SDL_INIT_HAPTIC,
-    GameController = SDL_INIT_GAMECONTROLLER,
-    Events = SDL_INIT_EVENTS,
-    Sensor = SDL_INIT_SENSOR,
-    NoParachute = SDL_INIT_NOPARACHUTE,
-    Everything = Timer | Audio | Video | Joystick | Haptic | GameController | Events | Sensor | NoParachute,
-};
+    static constexpr Uint32 none = 0;
+    static constexpr Uint32 timer = SDL_INIT_TIMER;
+    static constexpr Uint32 audio = SDL_INIT_AUDIO;
+    static constexpr Uint32 video = SDL_INIT_VIDEO;
+    static constexpr Uint32 joystick = SDL_INIT_JOYSTICK;
+    static constexpr Uint32 haptic = SDL_INIT_HAPTIC;
+    static constexpr Uint32 game_controller = SDL_INIT_GAMECONTROLLER;
+    static constexpr Uint32 events = SDL_INIT_EVENTS;
+    static constexpr Uint32 sensor = SDL_INIT_SENSOR;
+    static constexpr Uint32 no_parachute = SDL_INIT_NOPARACHUTE;
+    static constexpr Uint32 everything = timer | audio | video | joystick | haptic | game_controller | events | sensor | no_parachute;
+}
 
 inline void initialize(Uint32 flags)
 {
     if (SDL_Init(flags) < 0) {
         throw sdl::exception::init{};
     }
-}
-
-inline void initialize(InitFlags flags)
-{
-    initialize(static_cast<Uint32>(flags));
 }
 
 inline void quit()

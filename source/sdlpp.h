@@ -282,6 +282,7 @@ class texture_from_surface final : virtual public generic_error
 
 enum class InitFlags : Uint32
 {
+    None = 0,
     Timer = SDL_INIT_TIMER,
     Audio = SDL_INIT_AUDIO,
     Video = SDL_INIT_VIDEO,

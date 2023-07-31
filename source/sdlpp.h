@@ -544,6 +544,16 @@ class Window
         return size;
     }
 
+    [[nodiscard]] int width() const noexcept
+    {
+        return std::get<0>(size());
+    }
+
+    [[nodiscard]] int height() const noexcept
+    {
+        return std::get<1>(size());
+    }
+
     [[nodiscard]] bool shown() const noexcept
     {
         return (SDL_GetWindowFlags(get_pointer()) & SDL_WINDOW_SHOWN) != 0U;

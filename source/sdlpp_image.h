@@ -45,13 +45,13 @@ class load_image : virtual public std::runtime_error
 
 enum class InitFlags
 {
-    none = 0,
-    jpg = IMG_INIT_JPG,
-    png = IMG_INIT_PNG,
-    tif = IMG_INIT_TIF,
-    webp = IMG_INIT_WEBP,
-    jxl = IMG_INIT_JXL,
-    avif = IMG_INIT_AVIF,
+    None = 0,
+    JPG = IMG_INIT_JPG,
+    PNG = IMG_INIT_PNG,
+    TIF = IMG_INIT_TIF,
+    WebP = IMG_INIT_WEBP,
+    JXL = IMG_INIT_JXL,
+    AVIF = IMG_INIT_AVIF,
 };
 
 inline void initialize(int flags)

@@ -282,15 +282,15 @@ class texture_from_surface final : virtual public generic_error
 
 enum class InitFlags : Uint32
 {
-    Timer = 0x00000001U,
-    Audio = 0x00000010U,
-    Video = 0x00000020U,
-    Joystick = 0x00000200U,
-    Haptic = 0x00001000U,
-    GameController = 0x00002000U,
-    Events = 0x00004000U,
-    Sensor = 0x00008000U,
-    NoParachute = 0x00100000U,
+    Timer = SDL_INIT_TIMER,
+    Audio = SDL_INIT_AUDIO,
+    Video = SDL_INIT_VIDEO,
+    Joystick = SDL_INIT_JOYSTICK,
+    Haptic = SDL_INIT_HAPTIC,
+    GameController = SDL_INIT_GAMECONTROLLER,
+    Events = SDL_INIT_EVENTS,
+    Sensor = SDL_INIT_SENSOR,
+    NoParachute = SDL_INIT_NOPARACHUTE,
     Everything = Timer | Audio | Video | Joystick | Haptic | GameController | Events | Sensor | NoParachute,
 };
 

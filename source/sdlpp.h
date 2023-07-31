@@ -365,6 +365,14 @@ convert_surface(SurfaceUniquePtr surface, const SDL_PixelFormat* format, Uint32 
 class Texture
 {
   public:
+    struct Properties
+    {
+        Uint32 format;
+        int access;
+        int width;
+        int height;
+    };
+
     Texture(TextureUniquePtr texture) noexcept : texture_{std::move(texture)} {}
 
     [[nodiscard]] TextureUniquePtr::pointer get_pointer() const noexcept
@@ -398,6 +406,13 @@ class Texture
         int height;
         SDL_QueryTexture(get_pointer(), nullptr, nullptr, nullptr, &height);
         return height;
+    }
+
+    [[nodiscard]] Properties properties() const noexcept
+    {
+        Properties properties;
+        SDL_QueryTexture(get_pointer(), &properties.format, &properties.access, &properties.width, &properties.height);
+        return properties;
     }
 
     [[nodiscard]] Point<int> size() const noexcept

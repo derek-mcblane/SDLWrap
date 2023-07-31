@@ -72,5 +72,6 @@ inline void quit()
 }
 
 [[nodiscard]] SurfaceUniquePtr load_image(const std::string& filename);
+[[nodiscard]] SurfaceUniquePtr load_sized_svg(const std::string& filename, int width, int height);
 
 } // namespace sdl::image

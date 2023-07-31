@@ -311,31 +311,6 @@ inline void quit()
     SDL_Quit();
 }
 
-class Context
-{
-  public:
-    [[nodiscard]] Context(Uint32 flags)
-    {
-        initialize(flags);
-    }
-
-    [[nodiscard]] Context(InitFlags flags)
-    {
-        initialize(flags);
-    }
-
-    [[nodiscard]] Context(const Context& other) = delete;
-    Context operator=(const Context& other) = delete;
-
-    [[nodiscard]] Context(Context&& other) noexcept = delete;
-    Context operator=(Context&& other) noexcept = delete;
-
-    ~Context() noexcept
-    {
-        quit();
-    }
-};
-
 struct WindowDeleter
 {
     void operator()(SDL_Window* window) noexcept

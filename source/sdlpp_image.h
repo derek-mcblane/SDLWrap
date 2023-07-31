@@ -70,31 +70,6 @@ inline void quit()
     IMG_Quit();
 }
 
-class Context
-{
-  public:
-    Context(int flags)
-    {
-        initialize(flags);
-    }
-
-    Context(InitFlags flags)
-    {
-        initialize(flags);
-    }
-
-    Context(const Context&) = delete;
-    Context& operator=(const Context&) = delete;
-
-    Context(Context&&) = delete;
-    Context& operator=(Context&&) = delete;
-
-    ~Context()
-    {
-        quit();
-    }
-};
-
 [[nodiscard]] SurfaceUniquePtr load_image(const std::string& filename);
 
 } // namespace sdl::image

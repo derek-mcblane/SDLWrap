@@ -464,6 +464,18 @@ class Renderer
         return mode;
     }
 
+    void set_viewport(const sdl::Rectangle<int>& rectangle) const {
+        if (SDL_RenderSetViewport(get_pointer(), &rectangle) != 0) {
+            throw exception::generic_error{};
+        }
+    }
+
+    sdl::Rectangle<int> get_viewport() const {
+        sdl::Rectangle<int> rectangle;
+        SDL_RenderGetViewport(get_pointer(), &rectangle);
+        return rectangle;
+    }
+
     void set_draw_color(const Color& color) const
     {
         if (SDL_SetRenderDrawColor(get_pointer(), color.r, color.g, color.b, color.a) != 0) {

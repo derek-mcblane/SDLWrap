@@ -45,6 +45,7 @@ class load_image : virtual public std::runtime_error
 
 enum class InitFlags
 {
+    none = 0,
     jpg = IMG_INIT_JPG,
     png = IMG_INIT_PNG,
     tif = IMG_INIT_TIF,

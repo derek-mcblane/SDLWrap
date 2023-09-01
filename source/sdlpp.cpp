@@ -129,8 +129,7 @@ bool is_point_in_rectangle<Point<float>, Rectangle<float>>(const Point<float> po
     return SDL_PointInFRect(&point, &rectangle) == SDL_TRUE;
 }
 
-[[nodiscard]] WindowUniquePtr
-make_window(const char* title, int x_position, int y_position, int width, int height, Uint32 flags)
+WindowUniquePtr make_window(const char* title, int x_position, int y_position, int width, int height, Uint32 flags)
 {
     WindowUniquePtr window{SDL_CreateWindow(title, x_position, y_position, width, height, flags)};
     if (window == nullptr) {
@@ -139,12 +138,12 @@ make_window(const char* title, int x_position, int y_position, int width, int he
     return window;
 }
 
-[[nodiscard]] WindowUniquePtr make_window(const WindowConfig& config)
+WindowUniquePtr make_window(const WindowConfig& config)
 {
     return make_window(config.title, config.x_position, config.y_position, config.width, config.height, config.flags);
 }
 
-[[nodiscard]] RendererUniquePtr make_renderer(SDL_Window* window, int index, Uint32 flags)
+RendererUniquePtr make_renderer(SDL_Window* window, int index, Uint32 flags)
 {
     RendererUniquePtr renderer{SDL_CreateRenderer(window, index, flags)};
     if (renderer == nullptr) {
@@ -153,12 +152,21 @@ make_window(const char* title, int x_position, int y_position, int width, int he
     return renderer;
 }
 
-[[nodiscard]] RendererUniquePtr make_renderer(SDL_Window* window, const RendererConfig& config)
+RendererUniquePtr make_renderer(SDL_Window* window, const RendererConfig& config)
 {
     return make_renderer(window, config.index, config.flags);
 }
 
-[[nodiscard]] TextureUniquePtr make_texture_from_surface(SDL_Renderer* renderer, SDL_Surface* surface)
+TextureUniquePtr make_texture(SDL_Renderer* renderer, Uint32 format, int access, int width, int height)
+{
+    TextureUniquePtr texture{SDL_CreateTexture(renderer, format, access, width, height)};
+    if (texture == nullptr) {
+        throw exception::generic_error{};
+    }
+    return texture;
+}
+
+TextureUniquePtr make_texture_from_surface(SDL_Renderer* renderer, SDL_Surface* surface)
 {
     TextureUniquePtr texture{SDL_CreateTextureFromSurface(renderer, surface)};
     if (texture == nullptr) {
@@ -167,12 +175,24 @@ make_window(const char* title, int x_position, int y_position, int width, int he
     return texture;
 }
 
-[[nodiscard]] TextureUniquePtr Renderer::make_texture_from_surface(SDL_Surface* surface)
+TextureUniquePtr Renderer::make_texture(Uint32 format, int access, int width, int height) const
+{
+    return ::sdl::make_texture(get_pointer(), format, access, width, height);
+}
+
+TextureUniquePtr Renderer::make_texture(const Texture::Properties& properties) const
+{
+    return ::sdl::make_texture(
+        get_pointer(), properties.format, properties.access, properties.width, properties.height
+    );
+}
+
+TextureUniquePtr Renderer::make_texture_from_surface(SDL_Surface* surface) const
 {
     return ::sdl::make_texture_from_surface(get_pointer(), surface);
 }
 
-[[nodiscard]] SurfaceUniquePtr load_bmp(const std::string& filename)
+SurfaceUniquePtr load_bmp(const std::string& filename)
 {
     SurfaceUniquePtr image{SDL_LoadBMP(filename.c_str())};
     if (image == nullptr) {
@@ -181,7 +201,7 @@ make_window(const char* title, int x_position, int y_position, int width, int he
     return image;
 }
 
-[[nodiscard]] SurfaceUniquePtr convert_surface(SurfaceUniquePtr surface, const SDL_PixelFormat* format, Uint32 flags)
+SurfaceUniquePtr convert_surface(SurfaceUniquePtr surface, const SDL_PixelFormat* format, Uint32 flags)
 {
     SurfaceUniquePtr converted_surface{SDL_ConvertSurface(surface.get(), format, flags)};
     if (converted_surface == nullptr) {
@@ -206,16 +226,17 @@ void Renderer::draw_point<float>(float point_x, float point_y) const
     }
 }
 
-template<>
-void Renderer::draw_point<Point<int>>(Point<int> point) const {
+template <>
+void Renderer::draw_point<Point<int>>(Point<int> point) const
+{
     draw_point(point.x, point.y);
 }
 
-template<>
-void Renderer::draw_point<Point<float>>(Point<float> point) const {
+template <>
+void Renderer::draw_point<Point<float>>(Point<float> point) const
+{
     draw_point(point.x, point.y);
 }
-
 
 void Renderer::draw_line(int x_begin, int y_begin, int x_end, int y_end) const
 {

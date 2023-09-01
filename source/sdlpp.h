@@ -56,10 +56,7 @@ template <typename T>
 using Point = typename select_point<T>::type;
 
 template <typename T>
-concept SDLPointT = std::disjunction_v<
-    std::is_same<T, SDL_Point>,
-    std::is_same<T, SDL_FPoint>
->;
+concept SDLPointT = std::disjunction_v<std::is_same<T, SDL_Point>, std::is_same<T, SDL_FPoint>>;
 
 template <typename Point>
 struct point_dimension;
@@ -280,20 +277,20 @@ class texture_from_surface final : virtual public generic_error
 
 } // namespace exception
 
-namespace InitFlags
-{
-    static constexpr Uint32 none = 0;
-    static constexpr Uint32 timer = SDL_INIT_TIMER;
-    static constexpr Uint32 audio = SDL_INIT_AUDIO;
-    static constexpr Uint32 video = SDL_INIT_VIDEO;
-    static constexpr Uint32 joystick = SDL_INIT_JOYSTICK;
-    static constexpr Uint32 haptic = SDL_INIT_HAPTIC;
-    static constexpr Uint32 game_controller = SDL_INIT_GAMECONTROLLER;
-    static constexpr Uint32 events = SDL_INIT_EVENTS;
-    static constexpr Uint32 sensor = SDL_INIT_SENSOR;
-    static constexpr Uint32 no_parachute = SDL_INIT_NOPARACHUTE;
-    static constexpr Uint32 everything = timer | audio | video | joystick | haptic | game_controller | events | sensor | no_parachute;
-}
+namespace InitFlags {
+static constexpr Uint32 none = 0;
+static constexpr Uint32 timer = SDL_INIT_TIMER;
+static constexpr Uint32 audio = SDL_INIT_AUDIO;
+static constexpr Uint32 video = SDL_INIT_VIDEO;
+static constexpr Uint32 joystick = SDL_INIT_JOYSTICK;
+static constexpr Uint32 haptic = SDL_INIT_HAPTIC;
+static constexpr Uint32 game_controller = SDL_INIT_GAMECONTROLLER;
+static constexpr Uint32 events = SDL_INIT_EVENTS;
+static constexpr Uint32 sensor = SDL_INIT_SENSOR;
+static constexpr Uint32 no_parachute = SDL_INIT_NOPARACHUTE;
+static constexpr Uint32 everything =
+    timer | audio | video | joystick | haptic | game_controller | events | sensor | no_parachute;
+} // namespace InitFlags
 
 inline void initialize(Uint32 flags)
 {
@@ -351,6 +348,7 @@ make_window(const char* title, int x_position, int y_position, int width, int he
 [[nodiscard]] RendererUniquePtr make_renderer(SDL_Window* window, int index, Uint32 flags);
 [[nodiscard]] RendererUniquePtr make_renderer(SDL_Window* window, const RendererConfig& config);
 
+[[nodiscard]] TextureUniquePtr make_texture();
 [[nodiscard]] TextureUniquePtr make_texture_from_surface(SDL_Renderer* renderer, SDL_Surface* surface);
 
 [[nodiscard]] SurfaceUniquePtr load_bmp(const std::string& filename);
@@ -464,16 +462,30 @@ class Renderer
         return mode;
     }
 
-    void set_viewport(const sdl::Rectangle<int>& rectangle) const {
+    void set_viewport(const sdl::Rectangle<int>& rectangle) const
+    {
         if (SDL_RenderSetViewport(get_pointer(), &rectangle) != 0) {
             throw exception::generic_error{};
         }
     }
 
-    sdl::Rectangle<int> get_viewport() const {
+    [[nodiscard]] sdl::Rectangle<int> get_viewport() const
+    {
         sdl::Rectangle<int> rectangle;
         SDL_RenderGetViewport(get_pointer(), &rectangle);
         return rectangle;
+    }
+
+    void set_render_target(SDL_Texture* texture) const
+    {
+        if (SDL_SetRenderTarget(get_pointer(), texture) != 0) {
+            throw exception::generic_error{};
+        }
+    }
+
+    [[nodiscard]] SDL_Texture* get_render_target() const
+    {
+        return SDL_GetRenderTarget(get_pointer());
     }
 
     void set_draw_color(const Color& color) const
@@ -511,7 +523,9 @@ class Renderer
     template <typename DestinationT>
     void copy(SDL_Texture& texture, const Rectangle<int>& source, const Rectangle<DestinationT>& destination);
 
-    TextureUniquePtr make_texture_from_surface(SDL_Surface* surface);
+    [[nodiscard]] TextureUniquePtr make_texture(Uint32 format, int access, int width, int height) const;
+    [[nodiscard]] TextureUniquePtr make_texture(const Texture::Properties& properties) const;
+    [[nodiscard]] TextureUniquePtr make_texture_from_surface(SDL_Surface* surface) const;
 
   private:
     RendererUniquePtr renderer_;

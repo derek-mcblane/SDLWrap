@@ -61,7 +61,7 @@ std::optional<Event> poll_event() noexcept
 void wait_event(Event* event)
 {
     if (SDL_WaitEvent(event) != 0) {
-        throw exception::generic_error{};
+        throw GenericError{};
     }
 }
 
@@ -80,7 +80,7 @@ Event wait_event()
 void wait_event(Event* event, int timeout)
 {
     if (SDL_WaitEventTimeout(event, timeout) != 0) {
-        throw exception::generic_error{};
+        throw GenericError{};
     }
 }
 
@@ -99,11 +99,11 @@ Event wait_event(int timeout)
 Uint32 register_events(int n_events)
 {
     if (n_events <= 0) {
-        throw exception::generic_error{};
+        throw GenericError{};
     }
     Uint32 event_id = SDL_RegisterEvents(n_events);
     if (event_id == UINT32_MAX) {
-        throw exception::generic_error{};
+        throw GenericError{};
     }
     return event_id;
 }
@@ -112,7 +112,7 @@ bool push_event(SDL_Event& event)
 {
     int status = SDL_PushEvent(&event);
     if (status < 0) {
-        throw exception::generic_error{};
+        throw GenericError{};
     }
     return status == 1;
 }
@@ -133,7 +133,7 @@ WindowUniquePtr make_window(const char* title, int x_position, int y_position, i
 {
     WindowUniquePtr window{SDL_CreateWindow(title, x_position, y_position, width, height, flags)};
     if (window == nullptr) {
-        throw exception::create_window{};
+        throw GenericError{};
     }
     return window;
 }
@@ -147,7 +147,7 @@ RendererUniquePtr make_renderer(SDL_Window* window, int index, Uint32 flags)
 {
     RendererUniquePtr renderer{SDL_CreateRenderer(window, index, flags)};
     if (renderer == nullptr) {
-        throw exception::create_renderer{};
+        throw GenericError{};
     }
     return renderer;
 }
@@ -161,7 +161,7 @@ TextureUniquePtr make_texture(SDL_Renderer* renderer, Uint32 format, int access,
 {
     TextureUniquePtr texture{SDL_CreateTexture(renderer, format, access, width, height)};
     if (texture == nullptr) {
-        throw exception::generic_error{};
+        throw GenericError{};
     }
     return texture;
 }
@@ -170,7 +170,7 @@ TextureUniquePtr make_texture_from_surface(SDL_Renderer* renderer, SDL_Surface* 
 {
     TextureUniquePtr texture{SDL_CreateTextureFromSurface(renderer, surface)};
     if (texture == nullptr) {
-        throw exception::texture_from_surface{};
+        throw GenericError{};
     }
     return texture;
 }
@@ -196,7 +196,7 @@ SurfaceUniquePtr load_bmp(const std::string& filename)
 {
     SurfaceUniquePtr image{SDL_LoadBMP(filename.c_str())};
     if (image == nullptr) {
-        throw exception::load_image{};
+        throw GenericError{};
     }
     return image;
 }
@@ -205,7 +205,7 @@ SurfaceUniquePtr convert_surface(SurfaceUniquePtr surface, const SDL_PixelFormat
 {
     SurfaceUniquePtr converted_surface{SDL_ConvertSurface(surface.get(), format, flags)};
     if (converted_surface == nullptr) {
-        throw exception::convert_surface{};
+        throw GenericError{};
     }
     return converted_surface;
 }
@@ -214,7 +214,7 @@ template <>
 void Renderer::draw_point<int>(int point_x, int point_y) const
 {
     if (SDL_RenderDrawPoint(get_pointer(), point_x, point_y) != 0) {
-        throw exception::generic_error{};
+        throw GenericError{};
     }
 }
 
@@ -222,7 +222,7 @@ template <>
 void Renderer::draw_point<float>(float point_x, float point_y) const
 {
     if (SDL_RenderDrawPointF(get_pointer(), point_x, point_y) != 0) {
-        throw exception::generic_error{};
+        throw GenericError{};
     }
 }
 
@@ -241,7 +241,7 @@ void Renderer::draw_point<Point<float>>(Point<float> point) const
 void Renderer::draw_line(int x_begin, int y_begin, int x_end, int y_end) const
 {
     if (SDL_RenderDrawLine(get_pointer(), x_begin, y_begin, x_end, y_end) != 0) {
-        throw exception::generic_error{};
+        throw GenericError{};
     }
 }
 
@@ -254,7 +254,7 @@ template <>
 void Renderer::fill_rectangle<Rectangle<int>>(const Rectangle<int>& rectangle)
 {
     if (SDL_RenderFillRect(get_pointer(), &rectangle) != 0) {
-        throw exception::generic_error{};
+        throw GenericError{};
     }
 }
 
@@ -262,7 +262,7 @@ template <>
 void Renderer::fill_rectangle<Rectangle<float>>(const Rectangle<float>& rectangle)
 {
     if (SDL_RenderFillRectF(get_pointer(), &rectangle) != 0) {
-        throw exception::generic_error{};
+        throw GenericError{};
     }
 }
 
@@ -270,7 +270,7 @@ template <>
 void Renderer::fill_rectangles<Rectangle<int>>(std::span<Rectangle<int>> rectangles)
 {
     if (SDL_RenderFillRects(get_pointer(), rectangles.data(), gsl::narrow<int>(rectangles.size())) != 0) {
-        throw exception::generic_error{};
+        throw GenericError{};
     }
 }
 
@@ -278,7 +278,7 @@ template <>
 void Renderer::fill_rectangles<Rectangle<float>>(std::span<Rectangle<float>> rectangles)
 {
     if (SDL_RenderFillRectsF(get_pointer(), rectangles.data(), gsl::narrow<int>(rectangles.size())) != 0) {
-        throw exception::generic_error{};
+        throw GenericError{};
     }
 }
 
@@ -286,7 +286,7 @@ template <>
 void Renderer::copy<int>(SDL_Texture& texture, const Rectangle<int>& source, const Rectangle<int>& destination)
 {
     if (SDL_RenderCopy(get_pointer(), &texture, &source, &destination) != 0) {
-        throw exception::generic_error{};
+        throw GenericError{};
     }
 }
 
@@ -294,7 +294,7 @@ template <>
 void Renderer::copy<float>(SDL_Texture& texture, const Rectangle<int>& source, const Rectangle<float>& destination)
 {
     if (SDL_RenderCopyF(get_pointer(), &texture, &source, &destination) != 0) {
-        throw exception::generic_error{};
+        throw GenericError{};
     }
 }
 

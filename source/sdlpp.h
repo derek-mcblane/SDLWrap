@@ -65,16 +65,18 @@ template <typename Point>
 using point_dimension_type = typename point_dimension<Point>::type;
 
 template <>
-struct point_dimension<SDL_Rect>
+struct point_dimension<SDL_Point>
 {
     using type = int;
 };
 
 template <>
-struct point_dimension<SDL_FRect>
+struct point_dimension<SDL_FPoint>
 {
     using type = float;
 };
+
+namespace point_operators {
 
 template <SDLPointT T>
 bool operator==(const T lhs, const T rhs)
@@ -143,6 +145,8 @@ T& operator/=(T& lhs, const U rhs)
     return lhs = lhs / rhs;
 }
 
+} // namespace point_operators
+
 template <typename T>
 struct select_rectangle;
 
@@ -179,6 +183,8 @@ struct rectangle_dimension<SDL_FRect>
     using type = float;
 };
 
+namespace rectangle_operators {
+
 template <typename RectangleT>
 RectangleT operator+(const RectangleT lhs, const Point<typename rectangle_dimension<RectangleT>::type> rhs)
 {
@@ -195,6 +201,14 @@ template <typename RectangleT>
 RectangleT& operator+=(RectangleT& lhs, const Point<typename rectangle_dimension<RectangleT>::type> rhs)
 {
     return lhs = lhs + rhs;
+}
+
+} // namespace rectangle_operators
+
+template <typename PointT>
+Rectangle<point_dimension_type<PointT>> make_rectangle(const PointT origin, const PointT size)
+{
+    return {origin.x, origin.y, size.x, size.y};
 }
 
 template <typename PointT, typename RectangleT>
@@ -218,64 +232,11 @@ struct WindowConfig
     Uint32 flags;
 };
 
-namespace exception {
-
-class generic_error : virtual public std::runtime_error
+class GenericError : virtual public std::runtime_error
 {
   public:
-    [[nodiscard]] generic_error() : std::runtime_error(SDL_GetError()) {}
-
-    [[nodiscard]] generic_error(const generic_error& other) noexcept = default;
-    generic_error& operator=(const generic_error& other) noexcept = default;
-
-    [[nodiscard]] generic_error(generic_error&& other) noexcept = default;
-    generic_error& operator=(generic_error&& other) noexcept = default;
-
-    ~generic_error() noexcept override = default;
-
-    [[nodiscard]] static const char* error() noexcept
-    {
-        return SDL_GetError();
-    }
+    [[nodiscard]] GenericError() : std::runtime_error(SDL_GetError()) {}
 };
-
-class init final : virtual public generic_error
-{
-  public:
-    [[nodiscard]] init() : std::runtime_error(SDL_GetError()) {}
-};
-
-class create_window final : virtual public generic_error
-{
-  public:
-    [[nodiscard]] create_window() : std::runtime_error(SDL_GetError()) {}
-};
-
-class create_renderer final : virtual public generic_error
-{
-  public:
-    [[nodiscard]] create_renderer() : std::runtime_error(SDL_GetError()) {}
-};
-
-class load_image final : virtual public generic_error
-{
-  public:
-    [[nodiscard]] load_image() : std::runtime_error(SDL_GetError()) {}
-};
-
-class convert_surface final : virtual public generic_error
-{
-  public:
-    [[nodiscard]] convert_surface() : std::runtime_error(SDL_GetError()) {}
-};
-
-class texture_from_surface final : virtual public generic_error
-{
-  public:
-    [[nodiscard]] texture_from_surface() : std::runtime_error(SDL_GetError()) {}
-};
-
-} // namespace exception
 
 namespace InitFlags {
 static constexpr Uint32 none = 0;
@@ -295,7 +256,7 @@ static constexpr Uint32 everything =
 inline void initialize(Uint32 flags)
 {
     if (SDL_Init(flags) < 0) {
-        throw sdl::exception::init{};
+        throw GenericError{};
     }
 }
 
@@ -348,7 +309,7 @@ make_window(const char* title, int x_position, int y_position, int width, int he
 [[nodiscard]] RendererUniquePtr make_renderer(SDL_Window* window, int index, Uint32 flags);
 [[nodiscard]] RendererUniquePtr make_renderer(SDL_Window* window, const RendererConfig& config);
 
-[[nodiscard]] TextureUniquePtr make_texture();
+[[nodiscard]] TextureUniquePtr make_texture(SDL_Renderer* renderer, Uint32 format, int access, int width, int height);
 [[nodiscard]] TextureUniquePtr make_texture_from_surface(SDL_Renderer* renderer, SDL_Surface* surface);
 
 [[nodiscard]] SurfaceUniquePtr load_bmp(const std::string& filename);
@@ -365,9 +326,15 @@ class Texture
         int access;
         int width;
         int height;
+
+        void set_size(const Point<int> size)
+        {
+            width = size.x;
+            height = size.y;
+        }
     };
 
-    Texture(TextureUniquePtr texture) noexcept : texture_{std::move(texture)} {}
+    Texture(TextureUniquePtr texture = nullptr) noexcept : texture_{std::move(texture)} {}
 
     [[nodiscard]] TextureUniquePtr::pointer get_pointer() const noexcept
     {
@@ -428,11 +395,9 @@ class Texture
 class Renderer
 {
   public:
+    Renderer(RendererUniquePtr renderer = nullptr) : renderer_{std::move(renderer)} {}
     Renderer(SDL_Window* window, int index, Uint32 flags) : renderer_{make_renderer(window, index, flags)} {}
-
     Renderer(SDL_Window* window, const RendererConfig& config) : renderer_{make_renderer(window, config)} {}
-
-    Renderer(RendererUniquePtr renderer) : renderer_{std::move(renderer)} {}
 
     [[nodiscard]] RendererUniquePtr::pointer get_pointer() const noexcept
     {
@@ -442,14 +407,14 @@ class Renderer
     void set_scale(float scale_x, float scale_y) const
     {
         if (SDL_RenderSetScale(get_pointer(), scale_x, scale_y) != 0) {
-            throw exception::generic_error{};
+            throw GenericError{};
         }
     }
 
     void set_draw_blend_mode(SDL_BlendMode mode) const
     {
         if (SDL_SetRenderDrawBlendMode(get_pointer(), mode) != 0) {
-            throw exception::generic_error{};
+            throw GenericError{};
         }
     }
 
@@ -457,7 +422,7 @@ class Renderer
     {
         SDL_BlendMode mode;
         if (SDL_GetRenderDrawBlendMode(get_pointer(), &mode) != 0) {
-            throw exception::generic_error{};
+            throw GenericError{};
         }
         return mode;
     }
@@ -465,7 +430,7 @@ class Renderer
     void set_viewport(const sdl::Rectangle<int>& rectangle) const
     {
         if (SDL_RenderSetViewport(get_pointer(), &rectangle) != 0) {
-            throw exception::generic_error{};
+            throw GenericError{};
         }
     }
 
@@ -479,7 +444,7 @@ class Renderer
     void set_render_target(SDL_Texture* texture) const
     {
         if (SDL_SetRenderTarget(get_pointer(), texture) != 0) {
-            throw exception::generic_error{};
+            throw GenericError{};
         }
     }
 
@@ -491,14 +456,14 @@ class Renderer
     void set_draw_color(const Color& color) const
     {
         if (SDL_SetRenderDrawColor(get_pointer(), color.r, color.g, color.b, color.a) != 0) {
-            throw exception::generic_error{};
+            throw GenericError{};
         }
     }
 
     void clear() const
     {
         if (SDL_RenderClear(get_pointer()) != 0) {
-            throw exception::generic_error{};
+            throw GenericError{};
         }
     }
 
@@ -534,15 +499,13 @@ class Renderer
 class Window
 {
   public:
+    Window(WindowUniquePtr window = nullptr) : window_(std::move(window)) {}
     Window(const char* title, int x_position, int y_position, int width, int height, Uint32 flags)
         : Window(make_window(title, x_position, y_position, width, height, flags))
     {}
-
     Window(const WindowConfig& config)
         : Window(config.title, config.x_position, config.y_position, config.width, config.height, config.flags)
     {}
-
-    Window(WindowUniquePtr window) : window_(std::move(window)) {}
 
     [[nodiscard]] WindowUniquePtr::pointer get_pointer() const noexcept
     {

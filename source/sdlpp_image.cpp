@@ -11,7 +11,7 @@ namespace sdl::image {
 {
     SurfaceUniquePtr image{IMG_Load(filename.c_str())};
     if (image == nullptr) {
-        throw exception::load_image{};
+        throw generic_error{};
     }
     return image;
 }
@@ -20,7 +20,7 @@ namespace sdl::image {
 {
     SurfaceUniquePtr image{IMG_LoadSizedSVG_RW(source, width, height)};
     if (image == nullptr) {
-        throw exception::load_image{};
+        throw generic_error{};
     }
     return image;
 }

@@ -117,6 +117,31 @@ bool push_event(SDL_Event& event)
     return status == 1;
 }
 
+RWOpsUniquePtr rw_from_file(const char* filename, const char* mode)
+{
+    RWOpsUniquePtr rw_ops{SDL_RWFromFile(filename, mode)};
+    if (rw_ops == nullptr) {
+        throw GenericError{};
+    }
+    return rw_ops;
+}
+
+RWOpsUniquePtr rw_from_file(const std::string& filename, const std::string& mode)
+{
+    return rw_from_file(filename.c_str(), mode.c_str());
+}
+
+#ifdef HAVE_STDIO_H
+RWOpsUniquePtr rw_from_file(FILE* file)
+{
+    RWOpsUniquePtr rw_ops{SDL_RWFromFP(file, SDL_FALSE)};
+    if (rw_ops == nullptr) {
+        throw GenericError{};
+    }
+    return rw_ops;
+}
+#endif
+
 template <>
 bool is_point_in_rectangle<Point<int>, Rectangle<int>>(const Point<int> point, const Rectangle<int> rectangle)
 {
@@ -283,7 +308,9 @@ void Renderer::fill_rectangles<Rectangle<float>>(std::span<Rectangle<float>> rec
 }
 
 template <>
-void Renderer::copy<int>(SDL_Texture& texture, const Rectangle<int>& source, const Rectangle<int>& destination)
+void Renderer::copy<Rectangle<int>>(
+    SDL_Texture& texture, const Rectangle<int>& source, const Rectangle<int>& destination
+)
 {
     if (SDL_RenderCopy(get_pointer(), &texture, &source, &destination) != 0) {
         throw GenericError{};
@@ -291,7 +318,9 @@ void Renderer::copy<int>(SDL_Texture& texture, const Rectangle<int>& source, con
 }
 
 template <>
-void Renderer::copy<float>(SDL_Texture& texture, const Rectangle<int>& source, const Rectangle<float>& destination)
+void Renderer::copy<Rectangle<float>>(
+    SDL_Texture& texture, const Rectangle<int>& source, const Rectangle<float>& destination
+)
 {
     if (SDL_RenderCopyF(get_pointer(), &texture, &source, &destination) != 0) {
         throw GenericError{};

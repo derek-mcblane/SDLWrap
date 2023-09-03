@@ -16,6 +16,12 @@
 
 namespace sdl {
 
+class GenericError : virtual public std::runtime_error
+{
+  public:
+    [[nodiscard]] GenericError() : std::runtime_error(SDL_GetError()) {}
+};
+
 using Event = SDL_Event;
 using EventType = SDL_EventType;
 using EventFilterCallback = int (*)(void* userdata, Event* event);
@@ -36,6 +42,84 @@ Event wait_event();
 void wait_event(Event* event, int timeout);
 void wait_event(Event& event, int timeout);
 Event wait_event(int timeout);
+
+struct RWOpsDeleter
+{
+    void operator()(SDL_RWops* rw_ops) noexcept
+    {
+        SDL_RWclose(rw_ops);
+    }
+};
+using RWOpsUniquePtr = std::unique_ptr<SDL_RWops, RWOpsDeleter>;
+
+RWOpsUniquePtr rw_from_file(const char* filename, const char* mode);
+RWOpsUniquePtr rw_from_file(const std::string& filename, const std::string& mode);
+#ifdef HAVE_STDIO_H
+RWOpsUniquePtr rw_from_file(FILE* file);
+#endif
+
+enum class RWSeekWhence : int
+{
+    set = RW_SEEK_SET,
+    current = RW_SEEK_CUR,
+    end = RW_SEEK_END
+};
+
+class RWOps
+{
+  public:
+    RWOps(RWOpsUniquePtr rw_ops = nullptr) : rw_ops_{std::move(rw_ops)} {}
+    RWOps(const char* filename, const char* mode) : rw_ops_{rw_from_file(filename, mode)} {}
+    RWOps(const std::string& filename, const std::string& mode) : rw_ops_{rw_from_file(filename, mode)} {}
+    RWOps(FILE* file) : rw_ops_{rw_from_file(file)} {}
+
+    [[nodiscard]] RWOpsUniquePtr::pointer get_pointer() const noexcept
+    {
+        return rw_ops_.get();
+    }
+
+    void close()
+    {
+        SDL_RWclose(rw_ops_.release());
+    }
+
+    std::size_t read(std::size_t size, std::size_t maxnum, void* data) const
+    {
+        std::size_t n_read = SDL_RWread(get_pointer(), data, size, maxnum);
+        if (n_read == 0) {
+            throw GenericError{};
+        }
+        return n_read;
+    }
+
+    [[nodiscard]] std::int64_t seek(int64_t offset, RWSeekWhence whence) const
+    {
+        std::int64_t seeked_offset = SDL_RWseek(get_pointer(), offset, static_cast<int>(whence));
+        if (seeked_offset == -1) {
+            throw GenericError{};
+        }
+        return seeked_offset;
+    }
+
+    [[nodiscard]] std::int64_t tell() const
+    {
+        std::int64_t seeked_offset = SDL_RWtell(get_pointer());
+        if (seeked_offset == -1) {
+            throw GenericError{};
+        }
+        return seeked_offset;
+    }
+
+    void write(const void* data, std::size_t size, std::size_t n) const
+    {
+        if (SDL_RWwrite(get_pointer(), data, size, n) < n) {
+            throw GenericError{};
+        }
+    }
+
+  private:
+    RWOpsUniquePtr rw_ops_;
+};
 
 template <typename T>
 struct select_point;
@@ -230,12 +314,6 @@ struct WindowConfig
     int width;
     int height;
     Uint32 flags;
-};
-
-class GenericError : virtual public std::runtime_error
-{
-  public:
-    [[nodiscard]] GenericError() : std::runtime_error(SDL_GetError()) {}
 };
 
 namespace InitFlags {
@@ -485,8 +563,8 @@ class Renderer
     template <typename Rectangle>
     void fill_rectangles(std::span<Rectangle> rectangles);
 
-    template <typename DestinationT>
-    void copy(SDL_Texture& texture, const Rectangle<int>& source, const Rectangle<DestinationT>& destination);
+    template <typename DestinationRectangle>
+    void copy(SDL_Texture& texture, const Rectangle<int>& source, const DestinationRectangle& destination);
 
     [[nodiscard]] TextureUniquePtr make_texture(Uint32 format, int access, int width, int height) const;
     [[nodiscard]] TextureUniquePtr make_texture(const Texture::Properties& properties) const;

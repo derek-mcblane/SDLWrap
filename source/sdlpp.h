@@ -71,7 +71,9 @@ class RWOps
     RWOps(RWOpsUniquePtr rw_ops = nullptr) : rw_ops_{std::move(rw_ops)} {}
     RWOps(const char* filename, const char* mode) : rw_ops_{rw_from_file(filename, mode)} {}
     RWOps(const std::string& filename, const std::string& mode) : rw_ops_{rw_from_file(filename, mode)} {}
+#ifdef HAVE_STDIO_H
     RWOps(FILE* file) : rw_ops_{rw_from_file(file)} {}
+#endif
 
     [[nodiscard]] RWOpsUniquePtr::pointer get_pointer() const noexcept
     {

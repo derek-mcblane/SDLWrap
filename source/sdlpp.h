@@ -142,12 +142,12 @@ template <typename T>
 using Point = typename select_point<T>::type;
 
 template <typename T>
-concept SDLPointT = std::disjunction_v<std::is_same<T, SDL_Point>, std::is_same<T, SDL_FPoint>>;
+concept PointT = std::disjunction_v<std::is_same<T, SDL_Point>, std::is_same<T, SDL_FPoint>>;
 
-template <typename Point>
+template <PointT Point>
 struct point_dimension;
 
-template <typename Point>
+template <PointT Point>
 using point_dimension_type = typename point_dimension<Point>::type;
 
 template <>
@@ -164,68 +164,68 @@ struct point_dimension<SDL_FPoint>
 
 namespace point_operators {
 
-template <SDLPointT T>
+template <PointT T>
 bool operator==(const T lhs, const T rhs)
 {
     return lhs.x == rhs.x && lhs.y == rhs.y;
 }
 
-template <SDLPointT T>
+template <PointT T>
 bool operator!=(const T lhs, const T rhs)
 {
     return lhs.x != rhs.x || lhs.y != rhs.y;
 }
 
-template <SDLPointT T>
+template <PointT T>
 T operator+(const T lhs, const T rhs)
 {
     return {lhs.x + rhs.x, lhs.y + rhs.y};
 }
 
-template <SDLPointT T>
+template <PointT T>
 
 T& operator+=(T& lhs, const T rhs)
 {
     return lhs = lhs + rhs;
 }
 
-template <SDLPointT T>
+template <PointT T>
 T operator-(const T lhs, const T rhs)
 {
     return {lhs.x - rhs.x, lhs.y - rhs.y};
 }
 
-template <SDLPointT T>
+template <PointT T>
 T& operator-=(T& lhs, const T rhs)
 {
     return lhs = lhs - rhs;
 }
 
-template <SDLPointT T, typename U>
+template <PointT T, typename U>
 T operator*(const U lhs, const T rhs)
 {
     return {lhs * rhs.x, lhs * rhs.y};
 }
 
-template <SDLPointT T, typename U>
+template <PointT T, typename U>
 T operator*(const T lhs, const U rhs)
 {
     return {lhs.x * rhs, lhs.y * rhs};
 }
 
-template <SDLPointT T, typename U>
+template <PointT T, typename U>
 T& operator*=(T& lhs, const U rhs)
 {
     return lhs = lhs * rhs;
 }
 
-template <SDLPointT T, typename U>
+template <PointT T, typename U>
 T operator/(const T lhs, const U rhs)
 {
     return {lhs.x / rhs, lhs.y / rhs};
 }
 
-template <SDLPointT T, typename U>
+template <PointT T, typename U>
 T& operator/=(T& lhs, const U rhs)
 {
     return lhs = lhs / rhs;
@@ -251,10 +251,13 @@ struct select_rectangle<float>
 template <typename T>
 using Rectangle = typename select_rectangle<T>::type;
 
-template <typename Rectangle>
+template <typename T>
+concept RectangleT = std::disjunction_v<std::is_same<T, SDL_Rect>, std::is_same<T, SDL_FRect>>;
+
+template <RectangleT Rectangle>
 struct rectangle_dimension;
 
-template <typename Rectangle>
+template <RectangleT Rectangle>
 using rectangle_dimension_type = typename rectangle_dimension<Rectangle>::type;
 
 template <>
@@ -271,34 +274,34 @@ struct rectangle_dimension<SDL_FRect>
 
 namespace rectangle_operators {
 
-template <typename RectangleT>
-RectangleT operator+(const RectangleT lhs, const Point<typename rectangle_dimension<RectangleT>::type> rhs)
+template <RectangleT Rectangle>
+Rectangle operator+(const Rectangle lhs, const Point<rectangle_dimension_type<Rectangle>> rhs)
 {
-    return RectangleT{lhs.x + rhs.x, lhs.y + rhs.y, lhs.w, lhs.h};
+    return Rectangle{lhs.x + rhs.x, lhs.y + rhs.y, lhs.w, lhs.h};
 }
 
-template <typename RectangleT>
-RectangleT operator+(const Point<typename rectangle_dimension<RectangleT>::type> lhs, const RectangleT rhs)
+template <RectangleT Rectangle>
+Rectangle operator+(const Point<rectangle_dimension_type<Rectangle>> lhs, const Rectangle rhs)
 {
     return rhs + lhs;
 }
 
-template <typename RectangleT>
-RectangleT& operator+=(RectangleT& lhs, const Point<typename rectangle_dimension<RectangleT>::type> rhs)
+template <RectangleT Rectangle>
+Rectangle& operator+=(Rectangle& lhs, const Point<rectangle_dimension_type<Rectangle>> rhs)
 {
     return lhs = lhs + rhs;
 }
 
 } // namespace rectangle_operators
 
-template <typename PointT>
-Rectangle<point_dimension_type<PointT>> make_rectangle(const PointT origin, const PointT size)
+template <PointT Point>
+Rectangle<point_dimension_type<Point>> make_rectangle(const Point origin, const Point size)
 {
     return {origin.x, origin.y, size.x, size.y};
 }
 
-template <typename PointT, typename RectangleT>
-bool is_point_in_rectangle(PointT point, RectangleT rectangle);
+template <PointT Point, RectangleT Rectangle>
+bool is_point_in_rectangle(Point point, Rectangle rectangle);
 
 using Color = SDL_Color;
 
@@ -554,18 +557,18 @@ class Renderer
 
     template <typename T>
     void draw_point(T point_x, T point_y) const;
-    template <typename Point>
+    template <PointT Point>
     void draw_point(Point point) const;
 
     void draw_line(int x_begin, int y_begin, int x_end, int y_end) const;
     void draw_line(Point<int> begin, Point<int> end) const;
 
-    template <typename Rectangle>
+    template <RectangleT Rectangle>
     void fill_rectangle(const Rectangle& rectangle);
-    template <typename Rectangle>
+    template <RectangleT Rectangle>
     void fill_rectangles(std::span<Rectangle> rectangles);
 
-    template <typename DestinationRectangle>
+    template <RectangleT DestinationRectangle>
     void copy(SDL_Texture& texture, const Rectangle<int>& source, const DestinationRectangle& destination);
 
     [[nodiscard]] TextureUniquePtr make_texture(Uint32 format, int access, int width, int height) const;

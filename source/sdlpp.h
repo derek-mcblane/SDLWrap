@@ -589,21 +589,25 @@ class Window
         return window_.get();
     }
 
-    [[nodiscard]] std::tuple<int, int> size() const noexcept
+    [[nodiscard]] Point<int> size() const noexcept
     {
-        std::tuple<int, int> size;
-        SDL_GetWindowSize(get_pointer(), &std::get<0>(size), &std::get<1>(size));
+        Point<int> size;
+        SDL_GetWindowSize(get_pointer(), &size.x, &size.y);
         return size;
     }
 
     [[nodiscard]] int width() const noexcept
     {
-        return std::get<0>(size());
+        int width;
+        SDL_GetWindowSize(get_pointer(), &width, nullptr);
+        return width;
     }
 
     [[nodiscard]] int height() const noexcept
     {
-        return std::get<1>(size());
+        int height;
+        SDL_GetWindowSize(get_pointer(), nullptr, &height);
+        return height;
     }
 
     [[nodiscard]] bool shown() const noexcept

@@ -294,12 +294,6 @@ Rectangle& operator+=(Rectangle& lhs, const Point<rectangle_dimension_type<Recta
 
 } // namespace rectangle_operators
 
-template <PointT Point>
-Rectangle<point_dimension_type<Point>> make_rectangle(const Point origin, const Point size)
-{
-    return {origin.x, origin.y, size.x, size.y};
-}
-
 template <PointT Point, RectangleT Rectangle>
 bool is_point_in_rectangle(Point point, Rectangle rectangle);
 

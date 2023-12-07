@@ -1,0 +1,155 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "debug",
+      "binaryDir": "${sourceDir}/build/debug",
+      "installDir": "${sourceDir}/install",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_DEBUG_POSTFIX": "-deb"
+      }
+    },
+    {
+      "name": "release",
+      "binaryDir": "${sourceDir}/build/release",
+      "installDir": "${sourceDir}/install",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "VS",
+      "generator": "Visual Studio 17 2022",
+      "binaryDir": "${sourceDir}/build-VS",
+      "installDir": "${sourceDir}/install-VS",
+      "cacheVariables": {
+        "CMAKE_DEBUG_POSTFIX": "-deb"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "configurePreset": "debug",
+      "jobs": 8
+    },
+    {
+      "name": "debug-install",
+      "configurePreset": "debug",
+      "targets": "install"
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "jobs": 8
+    },
+    {
+      "name": "release-install",
+      "configurePreset": "release",
+      "targets": "install"
+    },
+    {
+      "name": "VS-debug",
+      "configurePreset": "VS",
+      "configuration": "Debug",
+      "jobs": 8
+    },
+    {
+      "name": "VS-debug-install",
+      "configurePreset": "VS",
+      "configuration": "Debug",
+      "targets": "install"
+    },
+    {
+      "name": "VS-release",
+      "configurePreset": "VS",
+      "configuration": "Release",
+      "jobs": 8
+    },
+    {
+      "name": "VS-release-install",
+      "configurePreset": "VS",
+      "configuration": "Release",
+      "targets": "install"
+    }
+  ],
+  "workflowPresets": [
+    {
+        "name": "release",
+        "displayName": "Release Build and Install",
+        "description": "configure, build, and install the release configuration",
+        "steps": [
+            {
+                "type": "configure",
+                "name": "release"
+            },
+            {
+                "type": "build",
+                "name": "release"
+            },
+            {
+                "type": "build",
+                "name": "release-install"
+            }
+        ]
+    },
+    {
+        "name": "debug",
+        "displayName": "Debug Build and Install",
+        "description": "configure, build, and install the debug configuration",
+        "steps": [
+            {
+                "type": "configure",
+                "name": "debug"
+            },
+            {
+                "type": "build",
+                "name": "debug"
+            },
+            {
+                "type": "build",
+                "name": "debug-install"
+            }
+        ]
+    },
+    {
+        "name": "VS-release",
+        "displayName": "Visual Studio Release Build and Install",
+        "description": "configure, build, and install the release configuration",
+        "steps": [
+            {
+                "type": "configure",
+                "name": "VS"
+            },
+            {
+                "type": "build",
+                "name": "VS-release"
+            },
+            {
+                "type": "build",
+                "name": "VS-release-install"
+            }
+        ]
+    },
+    {
+        "name": "VS-debug",
+        "displayName": "Visual Studio Debug Build and Install",
+        "description": "configure, build, and install the debug configuration",
+        "steps": [
+            {
+                "type": "configure",
+                "name": "VS"
+            },
+            {
+                "type": "build",
+                "name": "VS-debug"
+            },
+            {
+                "type": "build",
+                "name": "VS-debug-install"
+            }
+        ]
+    }
+  ]
+}

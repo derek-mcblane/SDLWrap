@@ -36,9 +36,31 @@
   ],
   "buildPresets": [
     {
-      "name": "debug",
-      "configurePreset": "debug",
+      "name": "parallel",
+      "hidden": true,
       "jobs": 8
+    },
+    {
+      "name": "debug",
+      "inherits": "parallel",
+      "configurePreset": "debug"
+    },
+    {
+      "name": "release",
+      "inherits": "parallel",
+      "configurePreset": "release"
+    },
+    {
+      "name": "VS-debug",
+      "inherits": "parallel",
+      "configurePreset": "VS",
+      "configuration": "Debug"
+    },
+    {
+      "name": "VS-release",
+      "inherits": "parallel",
+      "configurePreset": "VS",
+      "configuration": "Release"
     },
     {
       "name": "debug-install",
@@ -46,32 +68,15 @@
       "targets": "install"
     },
     {
-      "name": "release",
-      "configurePreset": "release",
-      "jobs": 8
-    },
-    {
       "name": "release-install",
       "configurePreset": "release",
       "targets": "install"
-    },
-    {
-      "name": "VS-debug",
-      "configurePreset": "VS",
-      "configuration": "Debug",
-      "jobs": 8
     },
     {
       "name": "VS-debug-install",
       "configurePreset": "VS",
       "configuration": "Debug",
       "targets": "install"
-    },
-    {
-      "name": "VS-release",
-      "configurePreset": "VS",
-      "configuration": "Release",
-      "jobs": 8
     },
     {
       "name": "VS-release-install",

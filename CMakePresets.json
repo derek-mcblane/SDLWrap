@@ -11,7 +11,7 @@
     },
     {
       "name": "debug",
-      "inherits": ["base"],
+      "inherits": "base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_DEBUG_POSTFIX": "-deb"
@@ -19,48 +19,22 @@
     },
     {
       "name": "release",
-      "inherits": ["base"],
+      "inherits": "base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
-    {
-      "name": "VS",
-      "generator": "Visual Studio 17 2022",
-      "binaryDir": "${sourceDir}/build-VS",
-      "installDir": "${sourceDir}/install-VS",
-      "cacheVariables": {
-        "CMAKE_DEBUG_POSTFIX": "-deb"
       }
     }
   ],
   "buildPresets": [
     {
-      "name": "parallel",
-      "hidden": true,
+      "name": "debug",
+      "configurePreset": "debug",
       "jobs": 8
     },
     {
-      "name": "debug",
-      "inherits": "parallel",
-      "configurePreset": "debug"
-    },
-    {
       "name": "release",
-      "inherits": "parallel",
-      "configurePreset": "release"
-    },
-    {
-      "name": "VS-debug",
-      "inherits": "parallel",
-      "configurePreset": "VS",
-      "configuration": "Debug"
-    },
-    {
-      "name": "VS-release",
-      "inherits": "parallel",
-      "configurePreset": "VS",
-      "configuration": "Release"
+      "configurePreset": "release",
+      "jobs": 8
     },
     {
       "name": "debug-install",
@@ -70,18 +44,6 @@
     {
       "name": "release-install",
       "configurePreset": "release",
-      "targets": "install"
-    },
-    {
-      "name": "VS-debug-install",
-      "configurePreset": "VS",
-      "configuration": "Debug",
-      "targets": "install"
-    },
-    {
-      "name": "VS-release-install",
-      "configurePreset": "VS",
-      "configuration": "Release",
       "targets": "install"
     }
   ],
@@ -121,44 +83,6 @@
             {
                 "type": "build",
                 "name": "debug-install"
-            }
-        ]
-    },
-    {
-        "name": "VS-release",
-        "displayName": "Visual Studio Release Build and Install",
-        "description": "configure, build, and install the release configuration",
-        "steps": [
-            {
-                "type": "configure",
-                "name": "VS"
-            },
-            {
-                "type": "build",
-                "name": "VS-release"
-            },
-            {
-                "type": "build",
-                "name": "VS-release-install"
-            }
-        ]
-    },
-    {
-        "name": "VS-debug",
-        "displayName": "Visual Studio Debug Build and Install",
-        "description": "configure, build, and install the debug configuration",
-        "steps": [
-            {
-                "type": "configure",
-                "name": "VS"
-            },
-            {
-                "type": "build",
-                "name": "VS-debug"
-            },
-            {
-                "type": "build",
-                "name": "VS-debug-install"
             }
         ]
     }

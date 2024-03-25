@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.25.0)
 
 project(SDLWrap VERSION 0.1.0)
 
-set(CMAKE_BUILD_RPATH_USE_ORIGIN True)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH True)
-
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
